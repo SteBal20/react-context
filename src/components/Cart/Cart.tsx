@@ -1,8 +1,11 @@
+import { useContext } from "react";
+
 import classes from "./Cart.module.css";
-
 import Modal from "../UI/Modal";
+import CartContext from "../../store/cart-context";
+import CartItem from "./CartItem";
 
-export type CartItem = {
+export type CartItemType = {
   id: string;
   name: string;
   amount: number;
@@ -10,13 +13,31 @@ export type CartItem = {
 };
 
 const Cart: React.FC<{ onHideCart: () => void }> = (props) => {
+  const cartCtx = useContext(CartContext);
+
+  const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`;
+  const hasItems = cartCtx.items.length > 0;
+
+  const cartItemRemoveHandler = (item: CartItemType) => {
+    cartCtx.removeItem(item);
+  };
+
+  const cartItemAddHandler = (item: CartItemType) => {
+    cartCtx.addItem({ ...item, amount: 1 });
+  };
+
   const cartItems = (
     <ul className={classes["cart-items"]}>
-      {[{ id: "m1", name: "Sushi Mix", amount: 2, price: 45.98 }].map(
-        (item) => (
-          <li>{item.name}</li>
-        )
-      )}
+      {cartCtx.items.map((item) => (
+        <CartItem
+          key={item.id}
+          name={item.name}
+          amount={item.amount}
+          price={item.price}
+          onRemove={cartItemRemoveHandler.bind(null, item)}
+          onAdd={cartItemAddHandler.bind(null, item)}
+        />
+      ))}
     </ul>
   );
 
@@ -25,7 +46,7 @@ const Cart: React.FC<{ onHideCart: () => void }> = (props) => {
       {cartItems}
       <div className={classes.total}>
         <span>Total Amount</span>
-        <span>45.98</span>
+        <span>{totalAmount}</span>
       </div>
       <div className={classes.actions}>
         <button
@@ -34,7 +55,9 @@ const Cart: React.FC<{ onHideCart: () => void }> = (props) => {
         >
           Close
         </button>
-        <button className={classes.button}>Order</button>
+        {hasItems && (
+          <button className={classes.button}>Order</button>
+        )}
       </div>
     </Modal>
   );
