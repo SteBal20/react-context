@@ -71,6 +71,11 @@ const cartReducer = (state: CartState, action: ActionType) => {
       totalAmount: updatedTotalAmount,
     };
   }
+
+  if (action.type === "CLEAR") {
+    return defaultCartState;
+  }
+
   return defaultCartState;
 };
 
@@ -90,11 +95,18 @@ const CartProvider: React.FC<{ children: React.ReactNode }> = (
     dispatchCartAction({ type: "REMOVE", item });
   };
 
+  const clearCartHandler = (
+    item = { id: "", name: "", amount: 0, price: 0 }
+  ) => {
+    dispatchCartAction({ type: "CLEAR", item });
+  };
+
   const cartContext: CartContextType = {
     items: cartState.items,
     totalAmount: cartState.totalAmount,
     addItem: addItemToCartHandler,
     removeItem: removeItemFromCartHandler,
+    clearCart: clearCartHandler,
   };
 
   return (
